@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
     entry: path.join(__dirname, '../src/index/index.js'),
@@ -60,6 +61,7 @@ module.exports = {
             filename: 'index.html',
             template: path.join(__dirname, '../src/index/index.html'),
             inject: true // 打包后的入口文件是否自动注入到html中
-        })
+        }),
+        new CleanWebpackPlugin()
     ]
 }

@@ -161,6 +161,8 @@ code .
 ```
 ```javascript
     // webpack.config.js
+    const HtmlWebpackPlugin = require('html-webpack-plugin');
+
     module.exports = {
         ...
         plugins: [
@@ -172,6 +174,23 @@ code .
         ]
     }
 ```
+- 自动清理构建目录
+```sh
+    npm install --save-dev clean-webpack-plugin
+```
+```javascript
+    // webpack.config.js
+    const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+    module.exports = {
+        ...
+        plugins: [
+            ...
+            new CleanWebpackPlugin()
+        ]
+    }
+```
+
 基础配置完成，改下运行脚本，开始吧！
 ```javascript
     {
@@ -183,4 +202,4 @@ code .
         }
     }
 ```
-***hello world已经完成，详细代码可参考tag v1.0.0***
+***hello world已经完成，详细代码可参考tag v1.x.x***
