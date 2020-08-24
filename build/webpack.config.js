@@ -1,12 +1,46 @@
 const path = require('path');
+const glob = require('glob');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+const rootPath = process.cwd();
+
+function setMPA() {
+    const entry = {},
+        htmlWebpackPlugin = [];
+
+    const pageFiles = glob.sync(path.join(rootPath, 'src/*/index.js'));
+    Object.keys(pageFiles)
+        .forEach(index => {
+            const pageFile = pageFiles[index];
+            const match = pageFile.match(/src\/(.*)\/index\.js/);
+            const pageName = match && match[1];
+            entry[pageName] = pageFile;
+            htmlWebpackPlugin.push(
+                new HtmlWebpackPlugin({
+                    filename: `${pageName}.html`,
+                    template: path.join(rootPath, `src/${pageName}/index.html`),
+                    inject: true, // 打包后的入口文件是否自动注入到html中
+                    chunks: [`${pageName}`]
+                })
+            )
+        })
+
+    return {
+        entry,
+        htmlWebpackPlugin
+    }
+}
+
+const { entry, htmlWebpackPlugin } = setMPA();
 
 module.exports = {
-    entry: path.join(__dirname, '../src/index/index.js'),
+    mode: 'none',
+    entry,
     output: {
-        filename: '[name].js',
-        path: path.join(__dirname, '../dist')
+        filename: '[name][chunkhash:8].js',
+        path: path.join(rootPath, 'dist')
     },
     module: {
         rules: [
@@ -20,29 +54,43 @@ module.exports = {
             {
                 test: /\.css$/i,
                 use: [
-                    'style-loader',
+                    MiniCssExtractPlugin.loader,
                     'css-loader'
                 ],
             },
             {
-                test: /\.less$/,
+                test: /.less$/,
                 use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
                     {
-                        loader: 'style-loader'
+                        loader: 'postcss-loader',
+                        options: {
+                            plugins: () => [
+                                require('autoprefixer')({
+                                    overrideBrowserslist: ['last 2 version', '>1%', 'ios 7']
+                                })
+                            ]
+                        }
                     },
                     {
-                        loader: 'css-loader'
+                        loader: 'px2rem-loader',
+                        options: {
+                            remUnit: 75,
+                            remPrecision: 8
+                        }
                     },
-                    {
-                        loader: 'less-loader'
-                    },
-                ],
+                    'less-loader'
+                ]
             },
             {
                 test: /\.(png|jpe?g|gif|svg)$/i,
                 use: [
                     {
                         loader: 'file-loader',
+                        options: {
+                            name: '[name]_[hash:8].[ext]'
+                        }
                     },
                 ],
             },
@@ -51,17 +99,18 @@ module.exports = {
                 use: [
                     {
                         loader: 'file-loader',
+                        options: {
+                            name: '[name]_[hash:8].[ext]'
+                        }
                     },
                 ],
             },
         ]
     },
     plugins: [
-        new HtmlWebpackPlugin({
-            filename: 'index.html',
-            template: path.join(__dirname, '../src/index/index.html'),
-            inject: true // 打包后的入口文件是否自动注入到html中
+        new MiniCssExtractPlugin({
+            filename: '[name].[contenthash:8].css'
         }),
         new CleanWebpackPlugin()
-    ]
+    ].concat(htmlWebpackPlugin)
 }

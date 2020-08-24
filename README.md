@@ -203,3 +203,195 @@ code .
     }
 ```
 ***hello world已经完成，详细代码可参考tag v1.x.x***
+
+---
+
+<p style="color: darkcyan; font-weight: bold">这里继续深入配置</p>
+- 文件指纹
+
+入口文件：
+```javascript
+    ...
+    output: {
+        filename: '[name][chunkhash:8].js'
+        ...
+    }
+    ...
+```
+css文件：
+
+css文件设置文件指纹得先将css抽离成1个文件，可使用mini-css-extract-plugin
+```sh
+    npm install --save-dev mini-css-extract-plugin
+```
+```javascript
+    // webpack.config.js
+    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+    module.exports = {
+        ...
+        module: {
+            rules: [
+                ...
+                {
+                    test: /\.css$/i,
+                    use: [
+                        MiniCssExtractPlugin.loader,
+                        // 'style-loader',
+                        'css-loader'
+                    ],
+                },
+                {
+                    test: /\.less$/,
+                    use: [
+                        {
+                            loader: MiniCssExtractPlugin.loader
+                        },
+                        // {
+                        //     loader: 'style-loader'
+                        // },
+                        {
+                            loader: 'css-loader'
+                        },
+                        {
+                            loader: 'less-loader'
+                        }
+                    ],
+                },
+            ]
+        },
+        plugins: [
+            ...
+            new MiniCssExtractPlugin({
+                filename: '[name].[contenthash:8].css'
+            })
+        ]
+    }
+```
+- 自动补全css3前缀
+```sh
+    npm i -D postcss-loader autoprefixer
+```
+```javascript
+    // webpack.config.js
+
+    module.exports = {
+        ...
+        module: {
+            rules: [
+                ...
+                {
+                    test: /\.less$/,
+                    use: [
+                        ...
+                        {
+                            loader: 'postcss-loader',
+                            options: {
+                                ident: 'postcss',
+                                plugins: [
+                                    require('autoprefixer')({
+                                        overrideBrowserslist: [
+                                            "last 2 version", "> 1%", "ios 7"
+                                        ]
+                                    })
+                                ]
+                            }
+                        }
+                    ],
+                }
+            ]
+        }
+    }
+```
+
+<p style="color: darkcyan; font-weight: bold">针对移动端一些配置</p>
+- px转换rem，配合amfe-flexible实现各个终端尺寸兼容
+```sh
+    npm install px2rem-loader --save-dev
+    npm i -S amfe-flexible
+```
+
+```javascript
+    // webpack.config.js
+    module.exports = {
+        ...
+        module: {
+            rules: [
+                ...
+                {
+                    test: /\.less$/,
+                    use: [
+                        ...
+                        {
+                            loader: 'px2rem-loader',
+                            options: {
+                                remUni: 75,
+                                remPrecision: 8
+                            }
+                        }
+                    ],
+                }
+            ]
+        }
+    }
+```
+- 内联js
+```sh
+    npm install raw-loader --save-dev
+```
+```html
+    <script>${ require('raw-loader!babel-loader!../../node_modules/amfe-flexible/index.js') }</script>
+```
+<p style="color: darkcyan; font-weight: bold">配置多页面入口</p>
+
+```sh
+    npm i glob
+```
+```javascript
+    // webpack.config.js
+    const glob = require('glob');
+
+    const rootPath = process.cwd();
+
+    function setMPA() {
+        const entry = {},
+            htmlWebpackPlugin = [];
+
+        const pageFiles = glob.sync(path.join(rootPath, 'src/*/index.js'));
+        Object.keys(pageFiles)
+            .forEach(index => {
+                const pageFile = pageFiles[index];
+                const match = pageFile.match(/src\/(.*)\/index\.js/);
+                const pageName = match && match[1];
+                entry[pageName] = pageFile;
+                htmlWebpackPlugin.push(
+                    new HtmlWebpackPlugin({
+                        filename: `${pageName}.html`,
+                        template: path.join(rootPath, `src/${pageName}/index.html`),
+                        inject: true, // 打包后的入口文件是否自动注入到html中
+                        chunks: [`${pageName}`]
+                    })
+                )
+            })
+
+        return {
+            entry,
+            htmlWebpackPlugin
+        }
+    }
+
+    const { entry, htmlWebpackPlugin } = setMPA();
+
+    module.exports = {
+        ...
+        entry,
+        output: {
+            ...
+            path: path.join(rootPath, 'dist')
+        },
+        ...
+        plugins: [
+            ...
+        ].concat(htmlWebpackPlugin)
+    }
+```
