@@ -395,3 +395,83 @@ css文件设置文件指纹得先将css抽离成1个文件，可使用mini-css-e
         ].concat(htmlWebpackPlugin)
     }
 ```
+
+<p style="color: darkcyan; font-weight: bold">依据运行环境打包</p>
+
+webpack.config.js --> webpack.base.js
+
+![build.png](https://i.loli.net/2020/08/24/5usB9XAYnvGMaiL.png)
+
+```json
+    {
+        ...
+        "scripts": {
+            ...
+            "dev": "webpack-dev-server --config ./build/webpack.dev.js",
+            "build": "webpack --config ./build/webpack.prod.js",
+            ...
+        },
+        ...
+    }
+```
+```sh
+    npm install css-minimizer-webpack-plugin --save-dev
+```
+```javascript
+    // webpack.dev.js
+
+    const webpack = require('webpack');
+    const { merge } = require('webpack-merge');
+    const baseConfig = require('./webpack.base');
+
+    const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
+
+    const devConfig = {
+        mode: 'development',
+        plugins: [
+            new webpack.HotModuleReplacementPlugin(),
+            new FriendlyErrorsWebpackPlugin()
+        ],
+        devServer: {
+            contentBase: './dist',
+            hot: true,
+            stats: 'errors-only'
+        },
+        devtool: 'cheap-source-map'
+    };
+
+    module.exports = merge(baseConfig, devConfig);
+
+    // webpack.prof.js
+
+    const { merge } = require('webpack-merge');
+    const CssMinimizerPlugin = require('css-minimizer-webpack-plugin'); // css 压缩
+    const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin') // cdn 托管第三方包
+    const baseConfig = require('./webpack.base');
+
+    const profConfig = {
+        mode: 'production',
+        plugins: [
+            new HtmlWebpackExternalsPlugin({
+                externals: [
+                    {
+                        module: 'react',
+                        entry: 'https://cdn.staticfile.org/react/0.0.0-0c756fb-f7f79fd/umd/react.production.min.js',
+                        global: 'React',
+                    },
+                    {
+                        module: 'react-dom',
+                        entry: 'https://cdn.staticfile.org/react-dom/0.0.0-0c756fb-f7f79fd/umd/react-dom.production.min.js',
+                        global: 'ReactDOM',
+                    }
+                ]
+            })
+        ],
+        optimization: {
+            minimize: true,
+            minimizer: [new CssMinimizerPlugin()],
+        }
+    };
+
+    module.exports = merge(baseConfig, profConfig);
+```

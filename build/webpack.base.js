@@ -36,10 +36,9 @@ function setMPA() {
 const { entry, htmlWebpackPlugin } = setMPA();
 
 module.exports = {
-    mode: 'none',
     entry,
     output: {
-        filename: '[name][chunkhash:8].js',
+        filename: '[name][hash:8].js',
         path: path.join(rootPath, 'dist')
     },
     module: {
@@ -89,7 +88,8 @@ module.exports = {
                     {
                         loader: 'file-loader',
                         options: {
-                            name: '[name]_[hash:8].[ext]'
+                            name: '[name]_[hash:8].[ext]',
+                            outputPath: 'images'
                         }
                     },
                 ],
