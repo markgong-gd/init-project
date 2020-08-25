@@ -475,3 +475,93 @@ webpack.config.js --> webpack.base.js
 
     module.exports = merge(baseConfig, profConfig);
 ```
+
+<p style="color: darkcyan; font-weight: bold">eslint</p>
+
+- 这里使用airbnb
+```sh
+    npm install eslint eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-jsx-a11y eslint-config-airbnb --save-dev
+
+    npm install eslint-loader babel-eslint --save-dev
+```
+```javascript
+    // .eslintrc.js
+
+    module.exports = {
+        parser: 'babel-eslint',
+        env: {
+            browser: true,
+            node: true
+        },
+        extends: 'airbnb',
+        rules: {
+            'react/jsx-filename-extension': 'off',
+            'comma-dangle': ['error', 'never']
+        }
+    };
+
+    // webpack.base.js
+
+    module.exports = {
+        ...
+        module: {
+            relus: [
+                {
+                    test: /\.js$/,
+                    exclude: /node_modules/,
+                    use: [
+                        {
+                            loader: 'babel-loader'
+                        },
+                        {
+                            loader: 'eslint-loader'
+                        }
+                    ]
+                }
+                ...
+            ]
+        }
+    }
+```
+```json
+    {
+        ...
+        "scripts": {
+            ...
+            "eslint": "eslint ./",
+            "lint": "eslint ./ --fix",
+            ...
+        }
+    }
+```
+
+<p style="color: darkcyan; font-weight: bold">增加precommit钩子</p>
+- 规范commit、push等git操作
+
+```sh
+    npm install husky validate-commit-message lint-staged conventional-changelog-cli commitizen --save-dev
+```
+```json
+    {
+        ...
+        "scripts": {
+            ...
+            "commitmsg": "validate-commit-msg",
+            "commit": "git-cz "
+            ...
+        },
+        ...
+        "husky": {
+            "hooks": {
+                "pre-commit": "lint-staged",
+                "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+            }
+        },
+        "lint-staged": {
+            "*.{js}": [
+                "eslint",
+                "git add"
+            ]
+        }
+    }
+```

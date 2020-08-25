@@ -5,6 +5,6 @@ import App from './components/app';
 import './index.less';
 
 ReactDOM.render(
-    <App/>,
-    document.querySelector('#root')
+  <App />,
+  document.querySelector('#root')
 );
