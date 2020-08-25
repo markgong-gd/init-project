@@ -528,8 +528,8 @@ webpack.config.js --> webpack.base.js
         ...
         "scripts": {
             ...
-            "eslint": "eslint ./",
-            "lint": "eslint ./ --fix",
+            "eslint": "eslint --ext .js src/",
+            "lint": "eslint --ext .js src/ --fix",
             ...
         }
     }
@@ -546,22 +546,10 @@ webpack.config.js --> webpack.base.js
         ...
         "scripts": {
             ...
+            "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
             "commitmsg": "validate-commit-msg",
             "commit": "git-cz "
             ...
-        },
-        ...
-        "husky": {
-            "hooks": {
-                "pre-commit": "lint-staged",
-                "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-            }
-        },
-        "lint-staged": {
-            "*.{js}": [
-                "eslint",
-                "git add"
-            ]
         }
     }
 ```
