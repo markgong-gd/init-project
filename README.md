@@ -97,7 +97,7 @@ code .
 ```
 - 打包less
 ```sh
-    npm install less-loader --save-dev
+    npm install less less-loader --save-dev
 ```
 ```javascript
     // webpack.config.js
@@ -306,6 +306,7 @@ css文件设置文件指纹得先将css抽离成1个文件，可使用mini-css-e
 
 <p style="color: darkcyan; font-weight: bold">针对移动端一些配置</p>
 - px转换rem，配合amfe-flexible实现各个终端尺寸兼容
+
 ```sh
     npm install px2rem-loader --save-dev
     npm i -S amfe-flexible
@@ -415,7 +416,9 @@ webpack.config.js --> webpack.base.js
     }
 ```
 ```sh
-    npm install css-minimizer-webpack-plugin --save-dev
+    npm install webpack-merge --save
+    npm install css-minimizer-webpack-plugin friendly-errors-webpack-plugin --save-dev
+    npm install html-webpack-externals-plugin --save-dev
 ```
 ```javascript
     // webpack.dev.js
@@ -539,7 +542,7 @@ webpack.config.js --> webpack.base.js
 - 规范commit、push等git操作
 
 ```sh
-    npm install husky validate-commit-message lint-staged conventional-changelog-cli commitizen --save-dev
+    npm install husky validate-commit-msg lint-staged conventional-changelog-cli commitizen --save-dev
 ```
 ```json
     {
@@ -551,5 +554,17 @@ webpack.config.js --> webpack.base.js
             "commit": "git-cz "
             ...
         }
+    }
+    ...
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged"
+        }
+    },
+    "lint-staged": {
+        "src/**/*.{js|jsx}": [
+            "eslint",
+            "git add"
+        ]
     }
 ```

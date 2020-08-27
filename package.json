@@ -10,9 +10,21 @@
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "commitmsg": "validate-commit-msg",
     "commit": "git-cz ",
+    "precommit": "lint-staged",
     "eslint": "eslint --ext .js src/",
     "lint": "eslint --ext .js src/ --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js|jsx}": [
+      "eslint",
+      "git add"
+    ]
   },
   "keywords": [],
   "author": "",
